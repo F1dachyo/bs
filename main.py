@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 
 # Раздаём статичные файлы (картинки, css, js)
-app.mount("/static", StaticFiles(directory="."), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():
