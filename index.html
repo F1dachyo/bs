@@ -19,6 +19,7 @@
       margin-top: 40px;
       font-size: 24px;
       font-weight: 300;
+      text-align: center;
     }
     #card {
       width: 300px;
@@ -32,6 +33,7 @@
       overflow: hidden;
       position: relative;
       user-select: none;
+      transition: transform 0.3s ease-out;
     }
     #card img {
       width: 100%;
@@ -51,6 +53,7 @@
       margin: 10px 0;
       cursor: pointer;
       font-size: 16px;
+      width: 100%;
     }
     .primary { background: black; color: white; }
     .secondary { background: #ddd; }
@@ -69,53 +72,79 @@
     <ul id="accessories"></ul>
     <button class="btn primary">Добавить в корзину</button>
     <button class="btn secondary">Нет, спасибо</button>
-    <p style="margin-top:20px;">Пожалуйста пройдите <a href="https://forms.gle/gAHPk8F3jaMWafNR6">опрос</a> для оценки вашего опыта</p>
+    <p style="margin-top:20px;">
+      Пожалуйста пройдите
+      <a href="https://forms.gle/gAHPk8F3jaMWafNR6">опрос</a>
+      для оценки вашего опыта
+    </p>
   </div>
 
   <script>
     let index = 1;
     const max = 5;
-    const liked = [];
     const accessories = [];
 
     const card = document.getElementById('card');
     const img = document.getElementById('image');
 
     let startX = 0;
+    let isDesktopDragging = false;
 
+    // -------- ТАЧ-СВАЙПЫ --------
     card.addEventListener('touchstart', (e) => {
       startX = e.touches[0].clientX;
     });
 
     card.addEventListener('touchend', (e) => {
       const endX = e.changedTouches[0].clientX;
-      const diff = endX - startX;
+      handleSwipe(endX - startX);
+    });
 
+    // -------- ПК — DRAG / SWIPE --------
+    card.addEventListener('mousedown', (e) => {
+      isDesktopDragging = true;
+      startX = e.clientX;
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (!isDesktopDragging) return;
+      isDesktopDragging = false;
+      handleSwipe(e.clientX - startX);
+    });
+
+    // -------- ОБРАБОТЧИК СВАЙПА --------
+    function handleSwipe(diff) {
       if (Math.abs(diff) < 40) return;
 
       if (diff < 0) {
-        liked.push(`образ ${index}`);
         accessories.push(`Аксесуар ${index}`);
       }
 
-      index++;
-      if (index > max) {
-        finish();
-      } else {
-        img.src = `/static/pic${index}.jpg`;
-      }
-    });
+      animateSwipe(diff);
 
+      setTimeout(() => {
+        index++;
+        if (index > max) {
+          finish();
+        } else {
+          img.src = `/static/pic${index}.jpg`;
+          card.style.transform = 'translateX(0)';
+        }
+      }, 300);
+    }
+
+    function animateSwipe(diff) {
+      if (diff > 0) {
+        card.style.transform = 'translateX(200px)';
+      } else {
+        card.style.transform = 'translateX(-200px)';
+      }
+    }
+
+    // -------- ФИНАЛ --------
     function finish() {
       card.style.display = 'none';
-      const listLiked = document.getElementById('liked');
       const listAcc = document.getElementById('accessories');
-
-      liked.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        listLiked.appendChild(li);
-      });
 
       accessories.forEach(item => {
         const li = document.createElement('li');
